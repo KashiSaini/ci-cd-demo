@@ -24,6 +24,10 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
 async def refresh_token(refresh_token: str = Body(...)):
     return await auth_service.refresh_access_token(refresh_token)
 
+@router.get("/ping")
+async def ping():
+    return {"status": "ok", "message": "CI/CD auto-deploy works!"}
+
 @router.post("/logout")
 async def logout(
     request: Request,
