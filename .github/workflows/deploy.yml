@@ -136,5 +136,5 @@ jobs:
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
             sleep 5
-            docker compose -f docker-compose.prod.yml exec -T auth-service sh -c "cd /code && alembic upgrade head"
+            docker compose -f docker-compose.prod.yml exec -T auth-service alembic upgrade head
             docker image prune -f
