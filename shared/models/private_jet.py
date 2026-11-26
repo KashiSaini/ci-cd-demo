@@ -1,7 +1,10 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
+
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
 from shared.db.postgres import Base
+
 
 class PrivateJet(Base):
     __tablename__ = "private_jets"

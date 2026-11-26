@@ -1,4 +1,5 @@
 import os
+
 from celery import Celery
 
 celery_app = Celery("booking_worker")
@@ -14,4 +15,3 @@ celery_app.conf.update(
     task_ignore_result=True,
 )
 
-import shared.tasks.booking_task

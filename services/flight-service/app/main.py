@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from app.routers.flights import router as flights_router
 
 app = FastAPI(title="Flight Service")

@@ -1,15 +1,15 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
+
 class PrivateJetCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     price_per_hour: float
     is_available: bool = True
-    available_from: Optional[datetime] = None
-    available_to: Optional[datetime] = None
+    available_from: datetime | None = None
+    available_to: datetime | None = None
 
 class PrivateJetResponse(BaseModel):
     id: int

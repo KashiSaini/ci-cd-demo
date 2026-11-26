@@ -1,4 +1,3 @@
-from typing import List, Optional
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,9 +23,9 @@ async def create_private_jet(
 ):
     return await private_jet_service.create_private_jet(jet_in=jet_in, db=db, current_user=current_user)
 
-@privatejet_router.get("/", response_model=List[PrivateJetResponse])
+@privatejet_router.get("/", response_model=list[PrivateJetResponse])
 async def list_private_jets(
-    available: Optional[bool] = True,
+    available: bool | None = True,
     db: AsyncSession = Depends(get_db),
 ):
     return await private_jet_service.list_private_jets(available=available, db=db)

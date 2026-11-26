@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, EmailStr
+
 
 class PassengerBooking(BaseModel):
     passenger_name: str

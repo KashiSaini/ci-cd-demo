@@ -3,7 +3,7 @@ import json
 
 from aiokafka import AIOKafkaProducer
 
-from shared.core.config import KAFKA_BOOTSTRAP_SERVERS, BOOKING_EVENTS_TOPIC
+from shared.core.config import BOOKING_EVENTS_TOPIC, KAFKA_BOOTSTRAP_SERVERS
 
 producer: AIOKafkaProducer | None = None
 

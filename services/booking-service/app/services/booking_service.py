@@ -4,8 +4,6 @@ from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared.tasks.booking_task import send_booking_confirmation_email
-
 from app.schemas.booking import BookingCreate
 from app.services.kafka_producer import publish_booking_event
 from shared.db.redis import redis_client
@@ -13,6 +11,7 @@ from shared.models.booking import Booking
 from shared.models.flight import Flight, Seat
 from shared.models.user import User
 from shared.observability import log_user_activity
+from shared.tasks.booking_task import send_booking_confirmation_email
 
 
 def _compute_price_for_destination(flight: Flight, seat_type: str, destination: str) -> float:

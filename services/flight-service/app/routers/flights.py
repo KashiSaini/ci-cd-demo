@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import Literal
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +11,7 @@ from shared.models.user import User
 
 router = APIRouter(prefix="/flights", tags=["Flights"])
 
-@router.get("/", response_model=List[FlightResponse])
+@router.get("/", response_model=list[FlightResponse])
 async def get_all_flights(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_logged_user),
@@ -41,7 +41,7 @@ async def create_flight(
         current_user=current_user,
     )
 
-@router.get("/{flight_id}/seats", response_model=List[SeatResponse])
+@router.get("/{flight_id}/seats", response_model=list[SeatResponse])
 async def get_flight_seats(
     flight_id: int,
     available: bool = True,
@@ -49,14 +49,14 @@ async def get_flight_seats(
 ):
     return await flight_service.get_flight_seats(flight_id=flight_id, available=available, db=db)
 
-@router.get("/search", response_model=List[FlightResponse])
+@router.get("/search", response_model=list[FlightResponse])
 async def search_flights(
     background_tasks: BackgroundTasks,
-    source: Optional[str] = None,
-    destination: Optional[str] = None,
-    departure_date: Optional[str] = None,
-    price_max: Optional[float] = None,
-    seat_class: Optional[Literal["business", "premium", "economy"]] = None,
+    source: str | None = None,
+    destination: str | None = None,
+    departure_date: str | None = None,
+    price_max: float | None = None,
+    seat_class: Literal["business", "premium", "economy"] | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     return await flight_service.search_flights(

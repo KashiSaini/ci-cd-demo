@@ -2,11 +2,11 @@ from fastapi import APIRouter, Body, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.schemas.auth import LoginRequest, UserCreate, UserResponse
+from app.services import auth_service
 from shared.db.postgres import get_db
 from shared.dependencies.auth import get_admin_user, get_current_logged_user
 from shared.models.user import User
-from app.schemas.auth import LoginRequest, UserCreate, UserResponse
-from app.services import auth_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -27,6 +27,8 @@ async def refresh_token(refresh_token: str = Body(...)):
 @router.get("/ping")
 async def ping():
     return {"status": "ok", "message": "CI/CD auto-deploy works!"}
+
+
 
 @router.post("/logout")
 async def logout(

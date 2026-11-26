@@ -1,4 +1,3 @@
-from typing import Optional
 
 from fastapi import APIRouter, Depends
 
@@ -20,7 +19,7 @@ async def get_user_activity_logs(
 
 @admin_router.get("/analytics")
 async def get_all_flight_analytics(
-    flight_id: Optional[int] = None,
+    flight_id: int | None = None,
     current_user: User = Depends(get_admin_user),
 ):
     return await admin_service.get_all_flight_analytics(flight_id=flight_id)
@@ -30,7 +29,7 @@ async def get_all_flight_analytics(
 async def get_booking_events(
     limit: int = 50,
     skip: int = 0,
-    event_type: Optional[str] = None,
+    event_type: str | None = None,
     current_user: User = Depends(get_admin_user),
 ):
     return await admin_service.get_booking_events(

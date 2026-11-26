@@ -1,5 +1,4 @@
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -9,13 +8,14 @@ from app.schemas.private_jet import PrivateJetBookingCreate, PrivateJetCreate
 from shared.models.private_jet import PrivateJet, PrivateJetBooking
 from shared.models.user import User
 
+
 async def create_private_jet(jet_in: PrivateJetCreate, db: AsyncSession, current_user: User):
     data = jet_in.model_dump()
     for key in ("available_from", "available_to"):
         if data.get(key):
             dt = data[key]
             if isinstance(dt, datetime) and dt.tzinfo is not None:
-                data[key] = dt.astimezone(timezone.utc).replace(tzinfo=None)
+                data[key] = dt.astimezone(UTC).replace(tzinfo=None)
 
     private_jet = PrivateJet(**data, owner_id=current_user.id)
     db.add(private_jet)
@@ -23,7 +23,7 @@ async def create_private_jet(jet_in: PrivateJetCreate, db: AsyncSession, current
     await db.refresh(private_jet)
     return private_jet
 
-async def list_private_jets(available: Optional[bool], db: AsyncSession):
+async def list_private_jets(available: bool | None, db: AsyncSession):
     query = select(PrivateJet)
     if available:
         query = query.where(PrivateJet.is_available == True)
@@ -43,7 +43,7 @@ async def book_private_jet(jet_id: int, booking_in: PrivateJetBookingCreate, cur
         if data.get(key):
             dt = data[key]
             if isinstance(dt, datetime) and dt.tzinfo is not None:
-                data[key] = dt.astimezone(timezone.utc).replace(tzinfo=None)
+                data[key] = dt.astimezone(UTC).replace(tzinfo=None)
 
     start = data["start_time"]
     end = data["end_time"]

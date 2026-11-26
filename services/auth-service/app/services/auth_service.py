@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.schemas.auth import LoginRequest, UserCreate
 from shared.core.config import ADMIN_EMAIL
 from shared.db.redis import redis_client
 from shared.models.user import User
@@ -12,7 +13,7 @@ from shared.security import (
     hash_password,
     verify_password,
 )
-from app.schemas.auth import LoginRequest, UserCreate
+
 
 async def register_user(user: UserCreate, db: AsyncSession):
     result = await db.execute(select(User).where(User.email == user.email))
@@ -71,7 +72,7 @@ async def refresh_access_token(refresh_token: str):
         )
         return {"access_token": new_access_token, "token_type": "bearer"}
     except Exception:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+        raise HTTPException(status_code=401, detail="Invalid refresh token") from None
 
 async def logout_user(current_user: User, token: str):
     await redis_client.delete(f"refresh_token:{current_user.id}")

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from shared.db.mongo import mongo_db
 
@@ -30,7 +29,7 @@ async def get_user_activity_logs(limit: int = 50, skip: int = 0):
     return logs
 
 
-async def get_all_flight_analytics(flight_id: Optional[int] = None):
+async def get_all_flight_analytics(flight_id: int | None = None):
     query = {}
     if flight_id:
         query["flight_id"] = flight_id
@@ -43,7 +42,7 @@ async def get_all_flight_analytics(flight_id: Optional[int] = None):
     return analytics_data
 
 
-async def get_booking_events(limit: int = 50, skip: int = 0, event_type: Optional[str] = None):
+async def get_booking_events(limit: int = 50, skip: int = 0, event_type: str | None = None):
     query = {}
     if event_type:
         query["event.event_type"] = event_type

@@ -1,6 +1,6 @@
 import json
-from datetime import datetime, timezone
-from typing import Literal, Optional
+from datetime import UTC, datetime
+from typing import Literal
 
 from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy import String, and_, cast, func, select
@@ -11,6 +11,7 @@ from shared.db.redis import redis_client
 from shared.models.flight import Flight, Seat
 from shared.models.user import User
 from shared.observability import increment_flight_analytics, log_user_activity
+
 
 async def get_all_flights(
     background_tasks: BackgroundTasks,
@@ -58,7 +59,7 @@ async def create_flight(
         if data.get(key):
             dt = data[key]
             if isinstance(dt, datetime) and dt.tzinfo is not None:
-                data[key] = dt.astimezone(timezone.utc).replace(tzinfo=None)
+                data[key] = dt.astimezone(UTC).replace(tzinfo=None)
 
     stops = data.get("stops") or []
     seg_prices = data.get("segment_prices")
@@ -121,11 +122,11 @@ async def get_flight_seats(flight_id: int, available: bool, db: AsyncSession):
 
 async def search_flights(
     background_tasks: BackgroundTasks,
-    source: Optional[str],
-    destination: Optional[str],
-    departure_date: Optional[str],
-    price_max: Optional[float],
-    seat_class: Optional[Literal["business", "premium", "economy"]],
+    source: str | None,
+    destination: str | None,
+    departure_date: str | None,
+    price_max: float | None,
+    seat_class: Literal["business", "premium", "economy"] | None,
     db: AsyncSession,
 ):
     filters = []
@@ -139,7 +140,7 @@ async def search_flights(
             dt = datetime.fromisoformat(departure_date).date()
             filters.append(func.date(Flight.departure_time) == dt)
         except ValueError:
-            raise HTTPException(status_code=400, detail="departure_date must be YYYY-MM-DD")
+            raise HTTPException(status_code=400, detail="departure_date must be YYYY-MM-DD") from None
     if price_max is not None and seat_class in ("business", "premium", "economy"):
         col = getattr(Flight, f"{seat_class}_price")
         filters.append(col <= price_max)
@@ -167,7 +168,7 @@ async def update_flight(
 
     for key, value in flight_in.model_dump().items():
         if value and key in ("departure_time", "arrival_time") and isinstance(value, datetime) and value.tzinfo is not None:
-            value = value.astimezone(timezone.utc).replace(tzinfo=None)
+            value = value.astimezone(UTC).replace(tzinfo=None)
         setattr(flight, key, value)
 
     await db.commit()

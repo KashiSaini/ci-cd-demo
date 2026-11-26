@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from app.routers.private_jets import privatejet_router
 
 app = FastAPI(title="Private Jet Service")

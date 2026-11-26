@@ -4,26 +4,94 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
-    inputs:
-      deploy_to_ec2:
-        description: "Deploy to EC2 after building? (Make sure EC2 is running)"
-        type: boolean
-        default: false
 
 jobs:
-  # 1. Fast syntax check across all services & shared code
-  ci-check:
+  # 1. Lint & syntax check (fast fail before spinning up containers)
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: Install Ruff linter
+        run: pip install ruff
+
+      - name: Run Ruff lint checks
+        run: ruff check services shared
 
       - name: Python syntax check
         run: python3 -m compileall services shared
 
-  # 2. Build & push all 5 microservices in parallel
+  # 2. Integration tests against real Postgres & Redis containers
+  integration-test:
+    needs: lint
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: kashi
+          POSTGRES_DB: flight
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:kashi@localhost:5432/flight
+      REDIS_URL: redis://localhost:6379/0
+      MONGO_URL: mongodb://localhost:27017
+      SECRET_KEY: ci-test-secret-key
+      ADMIN_EMAIL: admin@example.com
+      KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+      BOOKING_EVENTS_TOPIC: booking-events
+      CELERY_BROKER_URL: redis://localhost:6379/1
+      CELERY_RESULT_BACKEND: redis://localhost:6379/2
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies and test tools
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Run Alembic database migrations
+        run: alembic upgrade head
+
+      - name: Run integration tests
+        run: pytest tests/test_integration.py -v
+
+  # 3. Build & push all 5 microservices in parallel (only if lint + integration pass)
   build-and-push:
-    needs: ci-check
+    needs: integration-test
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -37,10 +105,10 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
@@ -52,10 +120,9 @@ jobs:
             -t ${{ secrets.DOCKER_USERNAME }}/flight-${{ matrix.service }}:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/flight-${{ matrix.service }}:latest
 
-  # 3. Only runs when you manually trigger the workflow with deploy_to_ec2 = true
+  # 4. Deploy to EC2 and run DB migrations (only if all 5 builds succeed)
   deploy:
     needs: build-and-push
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy_to_ec2 == true
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to EC2 via SSH
@@ -68,4 +135,6 @@ jobs:
             cd ~/flight-booking-backend
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            sleep 5
+            docker compose -f docker-compose.prod.yml exec -T auth-service sh -c "cd /code && alembic upgrade head"
             docker image prune -f

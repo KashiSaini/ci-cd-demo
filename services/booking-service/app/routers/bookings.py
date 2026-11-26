@@ -1,4 +1,3 @@
-from typing import List
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +10,7 @@ from shared.models.user import User
 
 bookings_router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
-@bookings_router.post("/flights/{flight_id}", response_model=List[BookingResponse])
+@bookings_router.post("/flights/{flight_id}", response_model=list[BookingResponse])
 async def book_flight(
     flight_id: int,
     booking_in: BookingCreate,
@@ -27,7 +26,7 @@ async def book_flight(
         db=db,
     )
 
-@bookings_router.get("/", response_model=List[BookingResponse])
+@bookings_router.get("/", response_model=list[BookingResponse])
 async def get_user_bookings(
     skip: int = 0,
     limit: int = 10,

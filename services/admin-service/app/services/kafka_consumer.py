@@ -1,6 +1,6 @@
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from aiokafka import AIOKafkaConsumer, TopicPartition
 
@@ -42,7 +42,7 @@ async def consume_booking_events_forever() -> None:
             while True:
                 records = await consumer.getmany(timeout_ms=1000)
 
-                for tp, messages in records.items():
+                for _tp, messages in records.items():
                     for msg in messages:
                         event = msg.value
                         await mongo_db.booking_events.insert_one(
@@ -50,7 +50,7 @@ async def consume_booking_events_forever() -> None:
                                 "kafka_topic": msg.topic,
                                 "kafka_partition": msg.partition,
                                 "kafka_offset": msg.offset,
-                                "received_at": datetime.now(timezone.utc),
+                                "received_at": datetime.now(UTC),
                                 "event": event,
                             }
                         )
