@@ -2,7 +2,7 @@ import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from app.routers.bookings import router as bookings_router
+from app.routers.bookings import bookings_router
 from app.services.kafka_producer import start_kafka_producer, stop_kafka_producer
 
 
