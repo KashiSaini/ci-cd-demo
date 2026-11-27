@@ -18,7 +18,13 @@ export default function FlightsPage() {
   const [flights, setFlights] = useState<FlightResponse[]>([])
   const [loading, setLoading] = useState(true)
 
-  const [filters, setFilters] = useState({
+const [filters, setFilters] = useState<{
+    source: string
+    destination: string
+    departure_date: string
+    seat_class: SeatClass | ''
+    price_max: string
+  }>({
     source: searchParams.get('source') || '',
     destination: searchParams.get('destination') || '',
     departure_date: searchParams.get('departure_date') || '',
