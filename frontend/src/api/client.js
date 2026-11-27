@@ -42,7 +42,6 @@ async function tryRefreshAccessToken() {
   const res = await fetch('/api/auth/refresh', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    // FastAPI endpoint expects: refresh_token: str = Body(...)
     body: JSON.stringify(refreshToken),
   })
 
@@ -96,7 +95,6 @@ async function request(url, options = {}, retry = true) {
   return data
 }
 
-// 1. Auth Service (8001 -> /api/auth)
 export const authApi = {
   ping: () => request('/api/auth/ping', { skipAuth: true }),
   register: (payload) =>
@@ -108,7 +106,6 @@ export const authApi = {
   promoteAdmin: (userId) => request(`/api/auth/promote-admin/${userId}`, { method: 'POST' }),
 }
 
-// 2. Flight Service (8002 -> /api/flights)
 export const flightApi = {
   listAll: (skip = 0, limit = 50) => request(`/api/flights/?skip=${skip}&limit=${limit}`),
   search: (params = {}) => {
@@ -127,7 +124,6 @@ export const flightApi = {
   remove: (flightId) => request(`/api/flights/${flightId}`, { method: 'DELETE' }),
 }
 
-// 3. Booking Service (8003 -> /api/bookings)
 export const bookingApi = {
   listMine: (skip = 0, limit = 50) => request(`/api/bookings/?skip=${skip}&limit=${limit}`),
   getById: (bookingId) => request(`/api/bookings/${bookingId}`),
@@ -136,7 +132,6 @@ export const bookingApi = {
   cancel: (bookingId) => request(`/api/bookings/${bookingId}`, { method: 'DELETE' }),
 }
 
-// 4. Private Jet Service (8004 -> /api/private-jets)
 export const privateJetApi = {
   list: (available = false) =>
     request(`/api/private-jets/${available ? '?available=true' : '?available=false'}`, { skipAuth: true }),
@@ -147,7 +142,6 @@ export const privateJetApi = {
     request(`/api/private-jets/${bookingId}/cancel`, { method: 'DELETE' }),
 }
 
-// 5. Admin Service (8005 -> /api/admin)
 export const adminApi = {
   getLogs: (limit = 50, skip = 0) => request(`/api/admin/logs?limit=${limit}&skip=${skip}`),
   getAnalytics: (flightId) =>

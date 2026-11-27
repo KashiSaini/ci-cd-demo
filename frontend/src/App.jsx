@@ -19,6 +19,12 @@ export default function App() {
 
   return (
     <>
+      <div className="ambient-bg" aria-hidden="true">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+      </div>
+
       <Navbar activePage={activePage} setActivePage={setActivePage} onNotify={notify} />
       <main className="container">
         {activePage === 'auth' && (

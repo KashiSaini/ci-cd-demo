@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Plane, Ticket, Sparkles, ShieldCheck, LogOut, LogIn, Activity } from 'lucide-react'
+import { Plane, Ticket, Sparkles, ShieldCheck, LogOut, LogIn } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { authApi } from '../api/client'
 
@@ -32,8 +32,8 @@ export default function Navbar({ activePage, setActivePage, onNotify }) {
             className={`badge ${apiOnline === true ? 'badge-success' : apiOnline === false ? 'badge-danger' : 'badge-info'}`}
             title="Auth service /auth/ping status"
           >
-            <Activity size={11} />
-            {apiOnline === true ? 'API Live' : apiOnline === false ? 'Offline' : '...'}
+            <span className={`pulse-dot ${apiOnline === false ? 'offline' : ''}`} />
+            {apiOnline === true ? 'API Live' : apiOnline === false ? 'Offline' : 'Checking'}
           </span>
         </div>
 
@@ -83,10 +83,7 @@ export default function Navbar({ activePage, setActivePage, onNotify }) {
               </button>
             </>
           ) : (
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => setActivePage('auth')}
-            >
+            <button className="btn btn-primary btn-sm" onClick={() => setActivePage('auth')}>
               <LogIn size={15} /> Sign In
             </button>
           )}

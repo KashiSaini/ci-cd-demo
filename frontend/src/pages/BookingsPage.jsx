@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Ticket, Trash2, RefreshCw } from 'lucide-react'
+import { Ticket, Trash2, RefreshCw, Plane } from 'lucide-react'
 import { bookingApi } from '../api/client'
 
 export default function BookingsPage({ onNotify }) {
@@ -38,11 +38,11 @@ export default function BookingsPage({ onNotify }) {
   }
 
   return (
-    <div className="stack">
+    <div className="stack page-enter">
       <div className="page-header">
         <div>
-          <h1>My Flight Bookings</h1>
-          <p>View your confirmed tickets, seat assignments, and booking references.</p>
+          <h1>My Boarding Passes</h1>
+          <p>Your confirmed tickets, seat assignments, and PNR references.</p>
         </div>
         <button className="btn btn-secondary btn-sm" onClick={loadBookings}>
           <RefreshCw size={14} /> Refresh
@@ -50,15 +50,27 @@ export default function BookingsPage({ onNotify }) {
       </div>
 
       {loading ? (
-        <div className="card empty-state">Loading your bookings...</div>
+        <div className="grid-2">
+          {[1, 2].map((n) => (
+            <div className="card stack" key={n}>
+              <div className="skeleton" style={{ height: '24px', width: '45%' }} />
+              <div className="skeleton" style={{ height: '50px', width: '100%' }} />
+              <div className="skeleton" style={{ height: '30px', width: '100%' }} />
+            </div>
+          ))}
+        </div>
       ) : bookings.length === 0 ? (
         <div className="card empty-state">You have no flight bookings yet.</div>
       ) : (
         <div className="grid-2">
-          {bookings.map((b) => (
-            <div className="card stack" key={b.id}>
+          {bookings.map((b, idx) => (
+            <div
+              className="boarding-pass stagger-item"
+              style={{ animationDelay: `${idx * 65}ms` }}
+              key={b.id}
+            >
               <div className="row-between">
-                <span className="badge badge-info">
+                <span className="badge badge-info mono">
                   <Ticket size={12} /> {b.booking_reference}
                 </span>
                 <span className={`badge ${b.status === 'confirmed' ? 'badge-success' : 'badge-danger'}`}>
@@ -66,26 +78,36 @@ export default function BookingsPage({ onNotify }) {
                 </span>
               </div>
 
-              <div className="row-between">
+              <div className="row-between" style={{ marginTop: '1rem' }}>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '1.05rem' }}>
+                  <span className="muted" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>
+                    Passenger
+                  </span>
+                  <div style={{ fontWeight: 800, fontSize: '1.15rem' }}>
                     {b.passenger_name || 'Passenger'}
                   </div>
-                  <div className="muted">
-                    Flight #{b.flight_id} · Destination: {b.destination || '—'}
+                  <div className="muted" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginTop: '0.2rem' }}>
+                    <Plane size={13} /> Flight #{b.flight_id} → <strong>{b.destination || '—'}</strong>
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>₹{b.price_paid}</div>
-                  <div className="muted">
-                    Seat {b.seat_number || '—'} ({b.seat_type})
+                  <span className="muted" style={{ fontSize: '0.72rem', textTransform: 'uppercase' }}>
+                    Fare Paid
+                  </span>
+                  <div className="mono" style={{ fontWeight: 700, fontSize: '1.2rem', color: 'var(--primary)' }}>
+                    ₹{b.price_paid}
+                  </div>
+                  <div className="muted mono" style={{ fontSize: '0.82rem' }}>
+                    Seat {b.seat_number || '—'} · {b.seat_type}
                   </div>
                 </div>
               </div>
 
-              <div className="row-between" style={{ borderTop: '1px solid var(--border)', paddingTop: '0.75rem' }}>
+              <div className="boarding-divider" />
+
+              <div className="row-between">
                 <span className="muted" style={{ fontSize: '0.78rem' }}>
-                  Booked: {new Date(b.booked_at).toLocaleString()}
+                  Issued: {new Date(b.booked_at).toLocaleString()}
                 </span>
                 {b.status !== 'cancelled' && (
                   <button
@@ -93,7 +115,7 @@ export default function BookingsPage({ onNotify }) {
                     disabled={cancellingId === b.id}
                     onClick={() => handleCancel(b.id)}
                   >
-                    <Trash2 size={14} /> {cancellingId === b.id ? 'Cancelling...' : 'Cancel'}
+                    <Trash2 size={14} /> {cancellingId === b.id ? 'Cancelling...' : 'Cancel Ticket'}
                   </button>
                 )}
               </div>

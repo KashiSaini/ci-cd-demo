@@ -73,14 +73,17 @@ export default function PrivateJetsPage({ onNotify, onRequireAuth }) {
   }
 
   return (
-    <div className="stack">
+    <div className="stack page-enter">
       <div className="page-header">
         <div>
+          <span className="badge badge-gold" style={{ marginBottom: '0.45rem' }}>
+            <Sparkles size={12} /> Executive Aviation
+          </span>
           <h1>Private Jet Charters</h1>
           <p>Reserve luxury aircraft by the hour with instant availability updates.</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', cursor: 'pointer' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.86rem', cursor: 'pointer' }}>
             <input
               type="checkbox"
               style={{ width: 'auto' }}
@@ -96,7 +99,7 @@ export default function PrivateJetsPage({ onNotify, onRequireAuth }) {
       </div>
 
       {recentBooking && (
-        <div className="card" style={{ borderColor: 'var(--success)' }}>
+        <div className="card stagger-item" style={{ borderColor: 'rgba(52, 211, 153, 0.5)' }}>
           <div className="row-between">
             <div>
               <strong>Latest Charter Confirmed — Booking #{recentBooking.id}</strong>
@@ -112,35 +115,48 @@ export default function PrivateJetsPage({ onNotify, onRequireAuth }) {
       )}
 
       {loading ? (
-        <div className="card empty-state">Loading fleet...</div>
+        <div className="grid-3">
+          {[1, 2, 3].map((n) => (
+            <div className="card stack" key={n}>
+              <div className="skeleton" style={{ height: '24px', width: '50%' }} />
+              <div className="skeleton" style={{ height: '55px', width: '100%' }} />
+              <div className="skeleton" style={{ height: '40px', width: '100%' }} />
+            </div>
+          ))}
+        </div>
       ) : jets.length === 0 ? (
         <div className="card empty-state">No private jets listed yet. Admins can add aircraft from the Admin Console.</div>
       ) : (
         <div className="grid-3">
-          {jets.map((jet) => (
-            <div className="card stack" key={jet.id}>
+          {jets.map((jet, idx) => (
+            <div
+              className="card card-interactive card-luxury stack stagger-item"
+              style={{ animationDelay: `${idx * 65}ms` }}
+              key={jet.id}
+            >
               <div className="row-between">
-                <span className="badge badge-info">
+                <span className="badge badge-gold">
                   <Sparkles size={12} /> Jet #{jet.id}
                 </span>
                 <span className={`badge ${jet.is_available ? 'badge-success' : 'badge-danger'}`}>
+                  {jet.is_available && <span className="pulse-dot" />}
                   {jet.is_available ? 'Available' : 'Chartered'}
                 </span>
               </div>
 
               <div>
-                <h3>{jet.name}</h3>
-                <p className="muted" style={{ marginTop: '0.25rem' }}>
+                <h3 style={{ fontSize: '1.18rem' }}>{jet.name}</h3>
+                <p className="muted" style={{ marginTop: '0.3rem' }}>
                   {jet.description || 'Executive charter aircraft'}
                 </p>
               </div>
 
-              <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>
-                ₹{jet.price_per_hour.toLocaleString()} <span className="muted">/ hour</span>
+              <div className="mono" style={{ fontSize: '1.28rem', fontWeight: 700, color: '#fde68a' }}>
+                ₹{jet.price_per_hour.toLocaleString()} <span className="muted" style={{ fontFamily: 'var(--font-sans)' }}>/ hour</span>
               </div>
 
               <button
-                className="btn btn-primary"
+                className="btn btn-gold"
                 disabled={!jet.is_available}
                 onClick={() => {
                   if (!isAuthenticated) {
@@ -186,7 +202,7 @@ export default function PrivateJetsPage({ onNotify, onRequireAuth }) {
             <div className="modal-header">
               <div>
                 <h2>Charter {selectedJet.name}</h2>
-                <p className="muted">₹{selectedJet.price_per_hour}/hour</p>
+                <p className="muted mono">₹{selectedJet.price_per_hour.toLocaleString()}/hour</p>
               </div>
               <button className="btn btn-secondary btn-sm" onClick={() => setSelectedJet(null)}>
                 <X size={16} />
@@ -211,16 +227,14 @@ export default function PrivateJetsPage({ onNotify, onRequireAuth }) {
                   onChange={(e) => setEndTime(e.target.value)}
                 />
               </div>
-              <div className="row-between" style={{ paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
+              <div className="row-between" style={{ paddingTop: '0.65rem', borderTop: '1px solid var(--border)' }}>
                 <div>
-                  <span className="muted">
-                    Duration: {estimatedHours.toFixed(1)} hr(s)
-                  </span>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+                  <span className="muted">Duration: {estimatedHours.toFixed(1)} hr(s)</span>
+                  <div className="mono" style={{ fontSize: '1.3rem', fontWeight: 700, color: '#fde68a' }}>
                     ₹{Math.round(estimatedHours * selectedJet.price_per_hour).toLocaleString()}
                   </div>
                 </div>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                <button type="submit" className="btn btn-gold" disabled={submitting}>
                   <CheckCircle2 size={16} /> {submitting ? 'Booking...' : 'Confirm Charter'}
                 </button>
               </div>

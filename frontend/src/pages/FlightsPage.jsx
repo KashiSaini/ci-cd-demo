@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Search, Plane, Calendar, RefreshCw } from 'lucide-react'
+import { Search, Plane, Calendar, RefreshCw, ArrowRight } from 'lucide-react'
 import { flightApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 import BookingModal from '../components/BookingModal'
@@ -65,16 +65,24 @@ export default function FlightsPage({ onNotify, onRequireAuth, onGoBookings }) {
   }
 
   return (
-    <div className="stack">
-      <div className="page-header">
-        <div>
-          <h1>Explore Flights</h1>
-          <p>Search routes, compare cabin classes, and pick your seats in real time.</p>
+    <div className="stack page-enter">
+      <section className="hero">
+        <div className="hero-content">
+          <div>
+            <span className="badge badge-info" style={{ marginBottom: '0.65rem' }}>
+              Live Microservices Fleet
+            </span>
+            <h1>Where are we flying next?</h1>
+            <p>
+              Search commercial routes in real time, compare Economy, Premium, and Business fares,
+              and lock in your exact seat on the cabin map.
+            </p>
+          </div>
+          <div className="hero-plane">
+            <Plane size={54} strokeWidth={1.5} />
+          </div>
         </div>
-        <button className="btn btn-secondary btn-sm" onClick={() => loadFlights(false)}>
-          <RefreshCw size={14} /> Refresh
-        </button>
-      </div>
+      </section>
 
       <form className="card" onSubmit={handleSearch}>
         <div className="form-grid">
@@ -115,7 +123,7 @@ export default function FlightsPage({ onNotify, onRequireAuth, onGoBookings }) {
             </select>
           </div>
           <div className="field">
-            <label>Max Price</label>
+            <label>Max Price (₹)</label>
             <input
               type="number"
               min="0"
@@ -125,37 +133,56 @@ export default function FlightsPage({ onNotify, onRequireAuth, onGoBookings }) {
             />
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1rem' }}>
-          <button type="submit" className="btn btn-primary">
-            <Search size={16} /> Search Flights
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={handleClear}>
-            Reset
+        <div className="row-between" style={{ marginTop: '1rem' }}>
+          <div style={{ display: 'flex', gap: '0.6rem' }}>
+            <button type="submit" className="btn btn-primary">
+              <Search size={16} /> Search Flights
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={handleClear}>
+              Reset
+            </button>
+          </div>
+          <button type="button" className="btn btn-secondary btn-sm" onClick={() => loadFlights(false)}>
+            <RefreshCw size={14} /> Refresh
           </button>
         </div>
       </form>
 
       {loading ? (
-        <div className="card empty-state">Loading flights...</div>
+        <div className="grid-2">
+          {[1, 2, 3, 4].map((n) => (
+            <div className="card stack" key={n}>
+              <div className="skeleton" style={{ height: '24px', width: '40%' }} />
+              <div className="skeleton" style={{ height: '36px', width: '100%' }} />
+              <div className="skeleton" style={{ height: '58px', width: '100%' }} />
+              <div className="skeleton" style={{ height: '40px', width: '100%' }} />
+            </div>
+          ))}
+        </div>
       ) : flights.length === 0 ? (
         <div className="card empty-state">
-          No flights found. Sign in as an Admin to add flights or adjust your search filters.
+          No flights match your search. Sign in as an Admin to add flights or reset your filters.
         </div>
       ) : (
         <div className="grid-2">
-          {flights.map((f) => (
-            <div className="card" key={f.id}>
+          {flights.map((f, idx) => (
+            <div
+              className="card card-interactive stagger-item"
+              style={{ animationDelay: `${idx * 65}ms` }}
+              key={f.id}
+            >
               <div className="row-between">
                 <span className="badge badge-info">
                   <Plane size={12} /> {f.airline || 'SkyBridge Air'}
                 </span>
-                <span className="muted">Flight #{f.id}</span>
+                <span className="muted mono">FLT-{String(f.id).padStart(3, '0')}</span>
               </div>
 
               <div className="route-row">
                 <div className="city-code">{f.source}</div>
                 <div className="route-line">
-                  <span>{f.stops?.length ? `${f.stops.length} stop (${f.stops.join(', ')})` : 'Direct'}</span>
+                  <Plane size={16} className="route-plane" />
+                  <span>{f.stops?.length ? `${f.stops.length} stop (${f.stops.join(', ')})` : 'Non-stop'}</span>
                 </div>
                 <div className="city-code">{f.destination}</div>
               </div>
@@ -194,7 +221,7 @@ export default function FlightsPage({ onNotify, onRequireAuth, onGoBookings }) {
                   }
                 }}
               >
-                Select Seats & Book
+                Select Seats & Book <ArrowRight size={15} />
               </button>
             </div>
           ))}

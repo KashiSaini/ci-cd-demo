@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { X, Plus, Trash2, CheckCircle2 } from 'lucide-react'
+import { X, Trash2, CheckCircle2, Plane } from 'lucide-react'
 import { bookingApi, flightApi } from '../api/client'
 import { useAuth } from '../context/AuthContext'
 
@@ -54,11 +54,7 @@ export default function BookingModal({ flight, onClose, onBooked, onNotify }) {
     )
   }
 
-  const estimateSeatPrice = (seatType) => {
-    const key = `${seatType}_price`
-    return Number(flight[key] || 0)
-  }
-
+  const estimateSeatPrice = (seatType) => Number(flight[`${seatType}_price`] || 0)
   const totalEstimate = passengers.reduce((sum, p) => sum + estimateSeatPrice(p.seat_type), 0)
 
   const handleConfirm = async (e) => {
@@ -92,11 +88,15 @@ export default function BookingModal({ flight, onClose, onBooked, onNotify }) {
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div>
-            <h2>Book Flight #{flight.id}</h2>
-            <p className="muted">
-              {flight.airline || 'SkyBridge Air'} · {flight.source} → {flight.destination}
-              {flight.stops?.length ? ` (Stops: ${flight.stops.join(', ')})` : ' (Non-stop)'}
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className="badge badge-info">
+                <Plane size={12} /> Flight #{flight.id}
+              </span>
+              <span className="muted">{flight.airline || 'SkyBridge Air'}</span>
+            </div>
+            <h2 style={{ marginTop: '0.35rem' }}>
+              {flight.source} → {flight.destination}
+            </h2>
           </div>
           <button className="btn btn-secondary btn-sm" onClick={onClose}>
             <X size={16} />
@@ -105,35 +105,38 @@ export default function BookingModal({ flight, onClose, onBooked, onNotify }) {
 
         <form className="stack" onSubmit={handleConfirm}>
           <div>
-            <div className="row-between" style={{ marginBottom: '0.5rem' }}>
-              <strong>1. Select Seats</strong>
-              <span className="muted">
+            <div className="row-between" style={{ marginBottom: '0.55rem' }}>
+              <strong>1. Interactive Cabin Seat Map</strong>
+              <span className="muted" style={{ fontSize: '0.78rem' }}>
                 Purple: Business · Blue: Premium · Green: Economy
               </span>
             </div>
-            {loadingSeats ? (
-              <p className="muted">Loading seat map...</p>
-            ) : seats.length === 0 ? (
-              <p className="muted">No seats configured for this flight.</p>
-            ) : (
-              <div className="seat-grid">
-                {seats.map((seat) => {
-                  const isSelected = selectedSeats.some((s) => s.seat_number === seat.seat_number)
-                  return (
-                    <button
-                      type="button"
-                      key={seat.id}
-                      disabled={seat.is_booked}
-                      onClick={() => toggleSeat(seat)}
-                      className={`seat-chip ${seat.seat_type} ${isSelected ? 'selected' : ''} ${seat.is_booked ? 'booked' : ''}`}
-                      title={`${seat.seat_number} (${seat.seat_type}) — ${seat.is_booked ? 'Booked' : 'Available'}`}
-                    >
-                      {seat.seat_number}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
+
+            <div className="cabin-shell">
+              {loadingSeats ? (
+                <div className="skeleton" style={{ height: '90px' }} />
+              ) : seats.length === 0 ? (
+                <p className="muted">No seats configured for this flight.</p>
+              ) : (
+                <div className="seat-grid">
+                  {seats.map((seat) => {
+                    const isSelected = selectedSeats.some((s) => s.seat_number === seat.seat_number)
+                    return (
+                      <button
+                        type="button"
+                        key={seat.id}
+                        disabled={seat.is_booked}
+                        onClick={() => toggleSeat(seat)}
+                        className={`seat-chip ${seat.seat_type} ${isSelected ? 'selected' : ''} ${seat.is_booked ? 'booked' : ''}`}
+                        title={`${seat.seat_number} (${seat.seat_type}) — ${seat.is_booked ? 'Booked' : 'Available'}`}
+                      >
+                        {seat.seat_number}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="field">
@@ -149,15 +152,21 @@ export default function BookingModal({ flight, onClose, onBooked, onNotify }) {
           {passengers.length > 0 && (
             <div className="stack">
               <strong>2. Passenger Details ({passengers.length})</strong>
-              {passengers.map((p) => (
+              {passengers.map((p, idx) => (
                 <div
                   key={p.seat_number}
-                  className="card"
-                  style={{ padding: '0.85rem', background: 'var(--bg-elevated)' }}
+                  className="card stagger-item"
+                  style={{
+                    padding: '0.9rem',
+                    background: 'rgba(7, 13, 28, 0.7)',
+                    animationDelay: `${idx * 40}ms`,
+                  }}
                 >
                   <div className="form-grid">
                     <div className="field">
-                      <label>Seat {p.seat_number} ({p.seat_type})</label>
+                      <label>
+                        Seat <span className="mono">{p.seat_number}</span> ({p.seat_type})
+                      </label>
                       <input
                         required
                         placeholder="Passenger Full Name"
@@ -193,10 +202,10 @@ export default function BookingModal({ flight, onClose, onBooked, onNotify }) {
             </div>
           )}
 
-          <div className="row-between" style={{ paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
+          <div className="row-between" style={{ paddingTop: '0.75rem', borderTop: '1px solid var(--border)' }}>
             <div>
               <span className="muted">Estimated Total</span>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+              <div className="mono" style={{ fontSize: '1.35rem', fontWeight: 700, color: 'var(--primary)' }}>
                 ₹{totalEstimate.toLocaleString()}
               </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { LogIn, UserPlus } from 'lucide-react'
+import { LogIn, UserPlus, Plane } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export default function AuthPage({ onSuccess, onNotify }) {
@@ -20,7 +20,7 @@ export default function AuthPage({ onSuccess, onNotify }) {
         await login(email, password)
       } else {
         await login(email, password)
-        onNotify('Welcome back!', 'success')
+        onNotify('Welcome back aboard!', 'success')
       }
       onSuccess()
     } catch (err) {
@@ -31,9 +31,21 @@ export default function AuthPage({ onSuccess, onNotify }) {
   }
 
   return (
-    <div className="auth-wrapper">
+    <div className="auth-wrapper page-enter">
       <div className="card">
-        <div className="tabs">
+        <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+          <span className="brand-icon" style={{ display: 'inline-flex', marginBottom: '0.7rem' }}>
+            <Plane size={22} />
+          </span>
+          <h2>{mode === 'login' ? 'Welcome Back' : 'Join SkyBridge'}</h2>
+          <p className="muted" style={{ marginTop: '0.2rem' }}>
+            {mode === 'login'
+              ? 'Sign in to manage flights, seats, and private charters.'
+              : 'Create your account in seconds.'}
+          </p>
+        </div>
+
+        <div className="tabs" style={{ justifyContent: 'center' }}>
           <button
             className={`tab ${mode === 'login' ? 'active' : ''}`}
             onClick={() => setMode('login')}
@@ -89,8 +101,8 @@ export default function AuthPage({ onSuccess, onNotify }) {
           </button>
 
           {mode === 'register' && (
-            <p className="muted" style={{ fontSize: '0.78rem' }}>
-              Tip: Registering with the backend&apos;s configured <code>ADMIN_EMAIL</code> automatically grants Admin access.
+            <p className="muted" style={{ fontSize: '0.78rem', textAlign: 'center' }}>
+              Registering with the configured <code className="mono">ADMIN_EMAIL</code> automatically grants Admin access.
             </p>
           )}
         </form>

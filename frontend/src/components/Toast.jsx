@@ -8,5 +8,10 @@ export default function Toast({ toast, onClose }) {
   }, [toast, onClose])
 
   if (!toast) return null
-  return <div className={`toast ${toast.type || 'success'}`}>{toast.message}</div>
+  return (
+    <div key={toast.message + Date.now()} className={`toast ${toast.type || 'success'}`}>
+      <div>{toast.message}</div>
+      <div className="toast-bar" />
+    </div>
+  )
 }

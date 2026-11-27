@@ -116,9 +116,12 @@ export default function AdminPage({ onNotify }) {
   }
 
   return (
-    <div className="stack">
+    <div className="stack page-enter">
       <div className="page-header">
         <div>
+          <span className="badge badge-admin" style={{ marginBottom: '0.45rem' }}>
+            <ShieldCheck size={12} /> Control Tower
+          </span>
           <h1>Admin Console</h1>
           <p>Manage flights, private jets, user roles, and observability telemetry.</p>
         </div>
@@ -140,7 +143,7 @@ export default function AdminPage({ onNotify }) {
       </div>
 
       {tab === 'flights' && (
-        <div className="stack">
+        <div className="stack page-enter">
           <form className="card stack" onSubmit={handleCreateFlight}>
             <h3>Create New Flight</h3>
             <div className="form-grid">
@@ -210,10 +213,10 @@ export default function AdminPage({ onNotify }) {
               <tbody>
                 {flights.map((f) => (
                   <tr key={f.id}>
-                    <td>#{f.id}</td>
+                    <td className="mono">#{f.id}</td>
                     <td>{f.airline || '—'}</td>
-                    <td>{f.source} → {f.destination}</td>
-                    <td>{f.economy_seats} / {f.premium_seats} / {f.business_seats}</td>
+                    <td><strong>{f.source}</strong> → <strong>{f.destination}</strong></td>
+                    <td className="mono">{f.economy_seats} / {f.premium_seats} / {f.business_seats}</td>
                     <td>
                       <button className="btn btn-danger btn-sm" onClick={() => handleDeleteFlight(f.id)}>
                         <Trash2 size={14} /> Delete
@@ -228,7 +231,7 @@ export default function AdminPage({ onNotify }) {
       )}
 
       {tab === 'jets' && (
-        <form className="card stack" style={{ maxWidth: '620px' }} onSubmit={handleCreateJet}>
+        <form className="card stack page-enter" style={{ maxWidth: '620px' }} onSubmit={handleCreateJet}>
           <h3>Add Private Jet</h3>
           <div className="field">
             <label>Aircraft Name</label>
@@ -243,7 +246,7 @@ export default function AdminPage({ onNotify }) {
             <input type="number" required value={jetForm.price_per_hour} onChange={(e) => setJetForm({ ...jetForm, price_per_hour: e.target.value })} />
           </div>
           <div>
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-gold">
               <Plus size={16} /> Add Private Jet
             </button>
           </div>
@@ -251,7 +254,7 @@ export default function AdminPage({ onNotify }) {
       )}
 
       {tab === 'users' && (
-        <div className="card table-wrap">
+        <div className="card table-wrap page-enter">
           <table>
             <thead>
               <tr>
@@ -265,7 +268,7 @@ export default function AdminPage({ onNotify }) {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td>#{u.id}</td>
+                  <td className="mono">#{u.id}</td>
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td>
@@ -288,7 +291,7 @@ export default function AdminPage({ onNotify }) {
       )}
 
       {tab === 'observability' && (
-        <div className="stack">
+        <div className="stack page-enter">
           <div className="row-between">
             <h3>Admin Telemetry (MongoDB + Kafka)</h3>
             <button className="btn btn-secondary btn-sm" onClick={loadObservability}>
@@ -296,26 +299,26 @@ export default function AdminPage({ onNotify }) {
             </button>
           </div>
           {obsError ? (
-            <div className="card" style={{ borderColor: 'var(--warning)', color: 'var(--warning)' }}>
+            <div className="card" style={{ borderColor: 'rgba(251, 191, 36, 0.45)', color: 'var(--warning)' }}>
               {obsError}
             </div>
           ) : (
             <div className="grid-3">
               <div className="card">
                 <h4>Activity Logs ({logs.length})</h4>
-                <pre className="muted" style={{ marginTop: '0.5rem', overflow: 'auto', maxHeight: '260px', fontSize: '0.75rem' }}>
+                <pre className="muted mono" style={{ marginTop: '0.5rem', overflow: 'auto', maxHeight: '260px', fontSize: '0.74rem' }}>
                   {JSON.stringify(logs, null, 2)}
                 </pre>
               </div>
               <div className="card">
                 <h4>Flight Analytics ({analytics.length})</h4>
-                <pre className="muted" style={{ marginTop: '0.5rem', overflow: 'auto', maxHeight: '260px', fontSize: '0.75rem' }}>
+                <pre className="muted mono" style={{ marginTop: '0.5rem', overflow: 'auto', maxHeight: '260px', fontSize: '0.74rem' }}>
                   {JSON.stringify(analytics, null, 2)}
                 </pre>
               </div>
               <div className="card">
                 <h4>Kafka Booking Events ({events.length})</h4>
-                <pre className="muted" style={{ marginTop: '0.5rem', overflow: 'auto', maxHeight: '260px', fontSize: '0.75rem' }}>
+                <pre className="muted mono" style={{ marginTop: '0.5rem', overflow: 'auto', maxHeight: '260px', fontSize: '0.74rem' }}>
                   {JSON.stringify(events, null, 2)}
                 </pre>
               </div>
